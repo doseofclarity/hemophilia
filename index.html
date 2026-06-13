@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Hemophilia | X-linked Bleeding Disorder | MCN Pillitteri</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        .transition-all { transition: all 0.3s ease; }
+        .recall-mode .reveal-text {
+            background-color: #cbd5e1 !important;
+            color: transparent !important;
+            border-radius: 0.375rem !important;
+            padding: 0 0.25rem !important;
+            cursor: pointer !important;
+            transition: background-color 0.2s, color 0.2s !important;
+            box-shadow: inset 0 0 0 1px #94a3b8 !important;
+            display: inline-block !important;
+        }
+        .recall-mode .reveal-text:hover,
+        .recall-mode .reveal-text.revealed {
+            background-color: #fde047 !important;
+            color: #1e293b !important;
+            box-shadow: none !important;
+        }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #be123c; border-radius: 8px; }
+        .content-section { animation: fade 0.3s ease; }
+        @keyframes fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .quiz-feedback-correct { background-color: #dcfce7; border-left: 4px solid #22c55e; }
+        .quiz-feedback-wrong { background-color: #fee2e2; border-left: 4px solid #ef4444; }
+        .locked-section { opacity: 0.6; cursor: not-allowed; pointer-events: none; }
+        .flashcard { background: #fff; border-radius: 1rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); transition: transform 0.2s; cursor: pointer; border: 1px solid #e2e8f0; }
+        .flashcard:hover { transform: translateY(-5px); }
+        .analogy-box { background: #ffe4e6; border-left: 8px solid #be123c; padding: 1rem; border-radius: 1rem; margin: 1rem 0; }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: { extend: { colors: { hemo: { light: '#ffe4e6', DEFAULT: '#be123c', dark: '#881337' } } } }
+        }
+    </script>
+</head>
+<body class="bg-slate-50 h-screen flex flex-col md:flex-row font-sans text-slate-800 overflow-hidden">
+
+    <!-- Mobile Header -->
+    <div class="md:hidden bg-hemo-dark text-white p-4 flex justify-between items-center shadow-md z-30 shrink-0">
+        <button onclick="toggleMobileMenu()" class="text-white focus:outline-none z-40">
+            <i class="fa-solid fa-bars text-2xl"></i>
+        </button>
+        <h1 class="font-bold text-lg absolute left-1/2 transform -translate-x-1/2 pointer-events-none">
+            <i class="fa-solid fa-droplet mr-2"></i> Hemophilia
+        </h1>
+        <div class="w-8"></div>
+    </div>
+
+    <!-- Sidebar Navigation -->
+    <nav id="sidebar" class="hidden md:flex flex-col w-full md:w-80 bg-white shadow-2xl h-full absolute md:relative z-30 transition-transform duration-300 shrink-0 border-r border-slate-200">
+        <div class="p-6 bg-gradient-to-br from-hemo-dark to-hemo text-white hidden md:block shrink-0">
+            <h1 class="font-black text-2xl tracking-wide"><i class="fa-solid fa-droplet mr-2"></i> Hemophilia</h1>
+            <p class="text-sm text-pink-200 mt-1 font-medium">X‑linked bleeding disorder · Factor VIII/IX deficiency</p>
+        </div>
+        <div class="flex-1 overflow-y-auto py-4">
+            <ul class="space-y-1 text-sm font-medium">
+                <li><button onclick="showSection('home')" id="btn-home" class="nav-btn w-full text-left px-6 py-3 bg-hemo-light text-hemo-dark border-r-4 border-hemo-dark transition-colors"><i class="fa-solid fa-house w-6 nav-icon"></i><i class="fa-solid fa-lock w-6 hidden"></i> Home / Start</button></li>
+                <li><button onclick="showSection('simple')" id="btn-simple" class="nav-btn w-full text-left px-6 py-3 text-slate-700 hover:bg-slate-50 transition-colors locked-section"><i class="fa-solid fa-face-smile w-6 nav-icon hidden"></i><i class="fa-solid fa-lock w-6 text-slate-400"></i> Hemophilia Like You're 5</button></li>
+                <li><button onclick="showSection('definition')" id="btn-definition" class="nav-btn w-full text-left px-6 py-3 text-slate-700 hover:bg-slate-50 transition-colors locked-section"><i class="fa-solid fa-book-open w-6 nav-icon hidden"></i><i class="fa-solid fa-lock w-6 text-slate-400"></i> Definition & Epidemiology</button></li>
+                <li><button onclick="showSection('genetics')" id="btn-genetics" class="nav-btn w-full text-left px-6 py-3 text-slate-700 hover:bg-slate-50 transition-colors locked-section"><i class="fa-solid fa-dna w-6 nav-icon hidden"></i><i class="fa-solid fa-lock w-6 text-slate-400"></i> Genetics & Types</button></li>
+                <li><button onclick="showSection('clinical')" id="btn-clinical" class="nav-btn w-full text-left px-6 py-3 text-slate-700 hover:bg-slate-50 transition-colors locked-section"><i class="fa-solid fa-stethoscope w-6 nav-icon hidden"></i><i class="fa-solid fa-lock w-6 text-slate-400"></i> Clinical Features & Severity</button></li>
+                <li><button onclick="showSection('diagnosis')" id="btn-diagnosis" class="nav-btn w-full text-left px-6 py-3 text-slate-700 hover:bg-slate-50 transition-colors locked-section"><i class="fa-solid fa-microscope w-6 nav-icon hidden"></i><i class="fa-solid fa-lock w-6 text-slate-400"></i> Diagnosis & Tests</button></li>
+                <li><button onclick="showSection('management')" id="btn-management" class="nav-btn w-full text-left px-6 py-3 text-slate-700 hover:bg-slate-50 transition-colors locked-section"><i class="fa-solid fa-hand-holding-medical w-6 nav-icon hidden"></i><i class="fa-solid fa-lock w-6 text-slate-400"></i> Management & Replacement Therapy</button></li>
+                <li><button onclick="showSection('nursing')" id="btn-nursing" class="nav-btn w-full text-left px-6 py-3 text-slate-700 hover:bg-slate-50 transition-colors locked-section"><i class="fa-solid fa-user-nurse w-6 nav-icon hidden"></i><i class="fa-solid fa-lock w-6 text-slate-400"></i> Nursing Care & Complications</button></li>
+                <li><button onclick="showSection('prevention')" id="btn-prevention" class="nav-btn w-full text-left px-6 py-3 text-slate-700 hover:bg-slate-50 transition-colors locked-section"><i class="fa-solid fa-shield-heart w-6 nav-icon hidden"></i><i class="fa-solid fa-lock w-6 text-slate-400"></i> Prevention & Genetic Counseling</button></li>
+                <li><button onclick="showSection('flashcards')" id="btn-flashcards" class="nav-btn w-full text-left px-6 py-3 text-slate-700 hover:bg-slate-50 transition-colors border-t border-slate-200 mt-2 locked-section"><i class="fa-solid fa-cards w-6 text-hemo nav-icon hidden"></i><i class="fa-solid fa-lock w-6 text-slate-400"></i> Flashcards & Mnemonics</button></li>
+                <li><button onclick="showSection('final_quiz_sec')" id="btn-final_quiz_sec" class="nav-btn w-full text-left px-6 py-3 text-slate-700 hover:bg-slate-50 transition-colors locked-section"><i class="fa-solid fa-graduation-cap w-6 text-amber-500 nav-icon hidden"></i><i class="fa-solid fa-lock w-6 text-slate-400"></i> Final 50‑Item Exam</button></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="flex-1 h-full overflow-y-auto bg-slate-100 relative w-full">
+        <div class="fixed top-16 md:top-4 right-4 md:right-8 z-40 flex items-center bg-white/90 backdrop-blur px-4 py-3 rounded-full shadow-lg border border-slate-200 cursor-pointer hover:bg-slate-50 transition-colors" onclick="toggleRecallMode()">
+            <span class="mr-3 text-sm font-bold text-slate-700 hidden md:inline"><i class="fa-solid fa-brain text-hemo mr-1"></i> Active Recall</span>
+            <button id="recall-toggle" class="w-12 h-6 bg-slate-300 rounded-full relative transition-colors duration-300 focus:outline-none shadow-inner pointer-events-none">
+                <div id="recall-knob" class="w-5 h-5 bg-white rounded-full absolute top-0.5 left-0.5 transition-transform duration-300 shadow"></div>
+            </button>
+        </div>
+
+        <div class="p-4 md:p-8 max-w-6xl mx-auto pb-32">
+            <!-- HOME SECTION -->
+            <section id="home" class="content-section flex flex-col items-center justify-center min-h-[80vh] text-center block">
+                <div class="bg-gradient-to-br from-slate-800 to-hemo-dark text-white rounded-3xl shadow-2xl p-10 md:p-16 w-full relative overflow-hidden">
+                    <div class="absolute top-0 right-0 -mt-10 -mr-10 text-white opacity-5 pointer-events-none"><i class="fa-solid fa-droplet text-[20rem]"></i></div>
+                    <div class="relative z-10">
+                        <div class="bg-white/10 backdrop-blur-sm inline-block p-4 rounded-full text-pink-300 mb-6 shadow-sm border border-white/20">
+                            <i class="fa-solid fa-hand-holding-heart text-5xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-300 mb-2 uppercase tracking-widest">Maternal & Child Health Nursing</h3>
+                        <h1 class="text-4xl md:text-6xl font-black text-white mb-6 leading-tight drop-shadow-md">Hemophilia</h1>
+                        <div class="bg-white/10 backdrop-blur inline-block px-6 py-3 rounded-full mb-10 border border-white/20">
+                            <p class="text-lg text-white font-medium">"An X‑linked inherited bleeding disorder caused by deficiency of clotting factor VIII (hemophilia A) or factor IX (hemophilia B)." – Pillitteri</p>
+                        </div>
+                        <button onclick="unlockFirstSection()" class="bg-slate-600 hover:bg-slate-500 text-white font-black py-4 px-10 rounded-full shadow-xl transition-transform hover:scale-105 text-lg flex items-center mx-auto focus:outline-none">
+                            Start Learning <i class="fa-solid fa-arrow-right ml-3"></i>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- "Hemophilia Like You're 5" -->
+            <section id="simple" class="content-section hidden">
+                <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+                    <h2 class="text-3xl font-black text-slate-800 mb-4 border-b-2 border-hemo pb-3"><i class="fa-solid fa-face-smile text-hemo mr-4"></i> Hemophilia Like You Are 5 Years Old</h2>
+                    <div class="analogy-box">
+                        <p class="text-lg font-bold">🧸 Imagine your blood is like a big bowl of jelly that helps your cuts stop bleeding.</p>
+                        <p>• In most people, the jelly has special "glue" (called <strong class="text-hemo-dark">clotting factors</strong>) that seals a cut quickly.<br>
+                        • In hemophilia, the glue is missing – or there isn't enough of it. So when a person gets a small cut, they may bleed for a long time.<br>
+                        • The worst bleeding happens <strong>inside the body</strong> – into knees, ankles, and elbows. That can hurt a lot and make the joints swollen.<br>
+                        • Boys get hemophilia more often because of the way the "glue gene" is passed down from mom.</p>
+                        <p class="mt-3">🩺 Doctors can give special medicine (factor concentrate) that works like the missing glue, so children can run, jump, and play safely!</p>
+                    </div>
+                    <div class="bg-pink-50 p-5 rounded-xl text-center mt-4">
+                        <i class="fa-solid fa-droplet text-6xl text-hemo"></i>
+                        <p class="font-bold mt-2">Why does bleeding last longer?</p>
+                        <div class="flex justify-center gap-4 mt-2 text-sm">
+                            <div><span class="inline-block w-4 h-4 bg-hemo rounded-full"></span> Missing "glue" (factor VIII/IX)</div>
+                        </div>
+                    </div>
+                    <button onclick="openQuiz('simple')" class="mt-6 w-full bg-slate-800 text-white font-black py-3 rounded-xl">Take Quiz → Unlock Next</button>
+                </div>
+            </section>
+
+            <!-- Definition & Epidemiology -->
+            <section id="definition" class="content-section hidden">
+                <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+                    <h2 class="text-3xl font-black text-slate-800 mb-4 border-b-2 border-hemo pb-3"><i class="fa-solid fa-book-open text-hemo mr-4"></i> Definition & Epidemiology</h2>
+                    <p><strong>Hemophilia</strong> – a group of inherited bleeding disorders characterized by deficiency of coagulation factor VIII (hemophilia A) or factor IX (hemophilia B). Hemophilia A accounts for 80‑85% of cases.</p>
+                    <div class="grid md:grid-cols-2 gap-5 mt-4">
+                        <div class="bg-slate-50 p-4 rounded-xl"><strong>📊 Global incidence</strong><br><span class="reveal-text">• Hemophilia A: 1 in 5,000 male births<br>• Hemophilia B: 1 in 30,000 male births<br>• Approximately 400,000 people worldwide have hemophilia (400,000 living with the disorder)</span></div>
+                        <div class="bg-slate-50 p-4 rounded-xl"><strong>🇵🇭 Philippines (Philippine Hemophilia Association)</strong><br><span class="reveal-text">• Estimated 10,000 people with hemophilia, but many remain undiagnosed.<br>• Only about 2,000 registered with the association.<br>• Access to factor concentrates remains limited; many rely on cryoprecipitate or fresh frozen plasma.</span></div>
+                    </div>
+                    <canvas id="hemoChart" width="400" height="200" style="max-width:100%; margin-top:1rem;"></canvas>
+                    <div class="bg-pink-50 p-3 rounded-lg mt-4"><strong>⚠️ Key point:</strong> <span class="reveal-text">Hemophilia is almost exclusively seen in males. Females are carriers (heterozygous) but may have mild bleeding symptoms due to lyonization (X‑inactivation).</span></div>
+                    <button onclick="openQuiz('definition')" class="mt-6 w-full bg-slate-800 text-white font-black py-3 rounded-xl">Take Quiz → Unlock Next</button>
+                </div>
+            </section>
+
+            <!-- Genetics & Types -->
+            <section id="genetics" class="content-section hidden">
+                <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+                    <h2 class="text-3xl font-black text-slate-800 mb-4 border-b-2 border-hemo pb-3"><i class="fa-solid fa-dna text-hemo mr-4"></i> Genetics & Types</h2>
+                    <div class="grid md:grid-cols-2 gap-5">
+                        <div><strong>🧬 X‑linked recessive inheritance</strong><br><span class="reveal-text">• Gene for factor VIII (F8) and factor IX (F9) located on X chromosome.<br>• Males (XY) with the mutation express the disease.<br>• Females (XX) are carriers (usually asymptomatic) but can have mild bleeding if X‑inactivation is skewed.<br>• Affected male transmits mutation to all daughters (obligate carriers), never to sons.</span></div>
+                        <div><strong>🔹 Types of hemophilia</strong><br><span class="reveal-text">• Hemophilia A (classic hemophilia) – factor VIII deficiency (80‑85%).<br>• Hemophilia B (Christmas disease) – factor IX deficiency (15‑20%).<br>• Hemophilia C (factor XI deficiency) – rare, autosomal recessive, milder bleeding, more common in Ashkenazi Jews.</span></div>
+                    </div>
+                    <div class="bg-amber-50 p-3 rounded-lg mt-4"><strong>📌 Pillitteri mnemonic:</strong> <span class="reveal-text">"A for Eight" – Hemophilia A = factor VIII deficiency. "B for Nine" – Hemophilia B = factor IX deficiency.</span></div>
+                    <button onclick="openQuiz('genetics')" class="mt-6 w-full bg-slate-800 text-white font-black py-3 rounded-xl">Take Quiz → Unlock Next</button>
+                </div>
+            </section>
+
+            <!-- Clinical Features & Severity -->
+            <section id="clinical" class="content-section hidden">
+                <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+                    <h2 class="text-3xl font-black text-slate-800 mb-4 border-b-2 border-hemo pb-3"><i class="fa-solid fa-stethoscope text-hemo mr-4"></i> Clinical Features & Severity</h2>
+                    <div class="grid md:grid-cols-2 gap-5">
+                        <div><strong>🩸 Bleeding patterns</strong><br><span class="reveal-text">• Hemarthrosis (bleeding into joints) – most common, targets knees, ankles, elbows → pain, swelling, limited motion.<br>• Easy bruising, soft tissue hematomas.<br>• Mucous membrane bleeding (epistaxis, gum bleeding).<br>• Prolonged bleeding after circumcision, dental extraction, trauma.<br>• Intracranial hemorrhage (most serious, can be fatal).</span></div>
+                        <div><strong>📊 Severity (based on factor level)</strong><br><span class="reveal-text">• Severe: <1% of normal factor activity → spontaneous bleeding, hemarthrosis (1‑2 times/week).<br>• Moderate: 1‑5% → bleeding after minor trauma, occasional spontaneous bleeding.<br>• Mild: 5‑40% → bleeding only after major trauma or surgery; often diagnosed later in life.</span></div>
+                    </div>
+                    <div class="bg-rose-50 p-3 rounded-lg mt-4"><strong>📌 Hemarthrosis complications:</strong> <span class="reveal-text">Chronic synovitis → hemosiderin deposition → cartilage destruction → hemophilic arthropathy (target joint).</span></div>
+                    <button onclick="openQuiz('clinical')" class="mt-6 w-full bg-slate-800 text-white font-black py-3 rounded-xl">Take Quiz → Unlock Next</button>
+                </div>
+            </section>
+
+            <!-- Diagnosis & Tests -->
+            <section id="diagnosis" class="content-section hidden">
+                <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+                    <h2 class="text-3xl font-black text-slate-800 mb-4 border-b-2 border-hemo pb-3"><i class="fa-solid fa-microscope text-hemo mr-4"></i> Diagnosis & Tests</h2>
+                    <ul class="list-disc pl-6 space-y-2">
+                        <li><strong>Screening coagulation tests:</strong> <span class="reveal-text">Prolonged activated partial thromboplastin time (aPTT). Normal prothrombin time (PT) and bleeding time.</span></li>
+                        <li><strong>Factor assays (gold standard):</strong> <span class="reveal-text">Factor VIII and factor IX activity levels. Differentiates hemophilia A vs B.</span></li>
+                        <li><strong>von Willebrand factor (VWF) assay:</strong> <span class="reveal-text">Excludes von Willebrand disease (which also causes low factor VIII).</span></li>
+                        <li><strong>Genetic testing:</strong> <span class="reveal-text">Identifies mutation (F8 gene inversion intron 22 is common in severe hemophilia A). Used for carrier detection and prenatal diagnosis.</span></li>
+                        <li><strong>Prenatal diagnosis:</strong> <span class="reveal-text">Chorionic villus sampling (CVS) at 11‑14 weeks or amniocentesis after 15 weeks for at‑risk pregnancies.</span></li>
+                    </ul>
+                    <div class="bg-green-50 p-3 rounded-lg mt-4"><strong>🔍 Gold standard:</strong> <span class="reveal-text">Factor VIII or IX activity assay (one‑stage clotting assay).</span></div>
+                    <button onclick="openQuiz('diagnosis')" class="mt-6 w-full bg-slate-800 text-white font-black py-3 rounded-xl">Take Quiz → Unlock Next</button>
+                </div>
+            </section>
+
+            <!-- Management & Replacement Therapy -->
+            <section id="management" class="content-section hidden">
+                <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+                    <h2 class="text-3xl font-black text-slate-800 mb-4 border-b-2 border-hemo pb-3"><i class="fa-solid fa-hand-holding-medical text-hemo mr-4"></i> Management & Replacement Therapy</h2>
+                    <div class="grid md:grid-cols-2 gap-5">
+                        <div><strong>💊 Factor replacement (mainstay)</strong><br><span class="reveal-text">• Plasma‑derived or recombinant factor VIII/IX concentrates.<br>• Prophylaxis (regular infusions 2‑3×/week) prevents hemarthrosis and arthropathy – standard of care for severe hemophilia.<br>• On‑demand therapy for bleeding episodes.<br>• Dose calculation: 1 IU/kg increases factor VIII level by 2% (for hemophilia A). For hemophilia B: 1 IU/kg increases factor IX by 1%.</span></div>
+                        <div><strong>💊 Other agents</strong><br><span class="reveal-text">• Desmopressin (DDAVP) – releases endogenous factor VIII; effective only in mild hemophilia A (not B).<br>• Antifibrinolytics (tranexamic acid, epsilon‑aminocaproic acid) – for mucosal bleeding (oral, dental) as adjunct.<br>• Emicizumab (Hemlibra) – bispecific antibody that mimics factor VIII, for hemophilia A with or without inhibitors.<br>• Recombinant factor VIIa (rFVIIa) – for hemophilia with inhibitors.</span></div>
+                    </div>
+                    <div class="bg-amber-50 p-3 rounded-lg mt-4"><strong>📌 Pillitteri note:</strong> <span class="reveal-text">"Avoid intramuscular injections, aspirin, and NSAIDs (ibuprofen, naproxen) because they increase bleeding risk. Acetaminophen is safe for pain/fever."</span></div>
+                    <button onclick="openQuiz('management')" class="mt-6 w-full bg-slate-800 text-white font-black py-3 rounded-xl">Take Quiz → Unlock Next</button>
+                </div>
+            </section>
+
+            <!-- Nursing Care & Complications -->
+            <section id="nursing" class="content-section hidden">
+                <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+                    <h2 class="text-3xl font-black text-slate-800 mb-4 border-b-2 border-hemo pb-3"><i class="fa-solid fa-user-nurse text-hemo mr-4"></i> Nursing Care & Complications</h2>
+                    <div class="grid md:grid-cols-2 gap-5">
+                        <div><strong>👩‍⚕️ Nursing interventions</strong><br><span class="reveal-text">• Bleeding precautions: soft toothbrush, avoid IM injections, use small‑gauge needles, apply pressure for 5‑10 minutes after venipuncture.<br>• For hemarthrosis: RICE (Rest, Ice, Compression, Elevation) plus factor replacement.<br>• Pre‑surgical / dental factor coverage.<br>• Administer vaccines subcutaneously (not IM).<br>• Educate family about home infusion therapy.</span></div>
+                        <div><strong>⚠️ Complications</strong><br><span class="reveal-text">• Inhibitor development (alloantibodies against factor VIII/IX) – occurs in 20‑30% of severe hemophilia A, renders replacement ineffective.<br>• Hemophilic arthropathy (chronic joint disease).<br>• Transfusion‑transmitted infections (hepatitis B/C, HIV) – rare now with viral inactivation and recombinant products.<br>• Intracranial hemorrhage (leading cause of death in severe hemophilia).</span></div>
+                    </div>
+                    <div class="bg-rose-50 p-3 rounded-lg mt-4"><strong>📞 Emergency signs (teach parents):</strong> <span class="reveal-text">Headache, vomiting, lethargy, unequal pupils → possible intracranial bleed. Neck pain, difficulty swallowing → retropharyngeal bleed.</span></div>
+                    <button onclick="openQuiz('nursing')" class="mt-6 w-full bg-slate-800 text-white font-black py-3 rounded-xl">Take Quiz → Unlock Next</button>
+                </div>
+            </section>
+
+            <!-- Prevention & Genetic Counseling -->
+            <section id="prevention" class="content-section hidden">
+                <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+                    <h2 class="text-3xl font-black text-slate-800 mb-4 border-b-2 border-hemo pb-3"><i class="fa-solid fa-shield-heart text-hemo mr-4"></i> Prevention & Genetic Counseling</h2>
+                    <ul class="list-disc pl-6 space-y-2">
+                        <li><strong>Carrier testing:</strong> <span class="reveal-text">Female relatives of affected males can undergo factor assay and genetic testing (F8/F9 mutation analysis).</span></li>
+                        <li><strong>Prenatal diagnosis:</strong> <span class="reveal-text">Chorionic villus sampling (CVS) at 11‑14 weeks or amniocentesis after 15 weeks to determine fetal sex and mutation status.</span></li>
+                        <li><strong>Preimplantation genetic diagnosis (PGD):</strong> <span class="reveal-text">For couples undergoing in vitro fertilization.</span></li>
+                        <li><strong>Primary prevention of bleeding:</strong> <span class="reveal-text">Regular prophylaxis with factor concentrates starting in early childhood prevents joint damage and allows normal physical activity.</span></li>
+                    </ul>
+                    <div class="bg-purple-50 p-3 rounded-lg mt-4"><strong>📌 Pillitteri patient teaching:</strong> <span class="reveal-text">"Young boys with hemophilia should be allowed to play, but contact sports (football, boxing, wrestling) should be avoided. Swimming, walking, and biking with helmet are recommended."</span></div>
+                    <button onclick="openQuiz('prevention')" class="mt-6 w-full bg-slate-800 text-white font-black py-3 rounded-xl">Take Quiz → Unlock Next</button>
+                </div>
+            </section>
+
+            <!-- Flashcards & Mnemonics -->
+            <section id="flashcards" class="content-section hidden">
+                <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+                    <h2 class="text-3xl font-black text-slate-800 mb-4 border-b-2 border-hemo pb-3"><i class="fa-solid fa-cards text-hemo mr-4"></i> Flashcards & Mnemonics</h2>
+                    <div class="grid md:grid-cols-2 gap-5">
+                        <div class="flashcard p-4" onclick="toggleFlash(this)"><div class="font-bold text-hemo">Q: Most common type of hemophilia?</div><div class="flash-answer hidden mt-2">Hemophilia A (factor VIII deficiency) – 80‑85% of cases.</div></div>
+                        <div class="flashcard p-4" onclick="toggleFlash(this)"><div class="font-bold text-hemo">Q: Inheritance pattern of hemophilia A and B?</div><div class="flash-answer hidden mt-2">X‑linked recessive.</div></div>
+                        <div class="flashcard p-4" onclick="toggleFlash(this)"><div class="font-bold text-hemo">Q: Drug of choice for mild hemophilia A?</div><div class="flash-answer hidden mt-2">Desmopressin (DDAVP) – releases endogenous factor VIII.</div></div>
+                        <div class="flashcard p-4" onclick="toggleFlash(this)"><div class="font-bold text-hemo">Q: Which analgesic is safe for pain in hemophilia?</div><div class="flash-answer hidden mt-2">Acetaminophen (paracetamol). Avoid aspirin and NSAIDs.</div></div>
+                        <div class="flashcard p-4" onclick="toggleFlash(this)"><div class="font-bold text-hemo">Q: Most common bleeding site in severe hemophilia?</div><div class="flash-answer hidden mt-2">Joints (hemarthrosis) – knees, ankles, elbows.</div></div>
+                        <div class="flashcard p-4" onclick="toggleFlash(this)"><div class="font-bold text-hemo">Q: What test is prolonged in hemophilia?</div><div class="flash-answer hidden mt-2">Activated partial thromboplastin time (aPTT). PT is normal.</div></div>
+                    </div>
+                    <div class="mt-6 bg-pink-50 p-4 rounded-xl"><strong>🧠 Mnemonics</strong><br><span class="reveal-text">“A for Eight, B for Nine” – Hemophilia A = factor VIII deficiency; Hemophilia B = factor IX deficiency.<br>“F.E.A.R.” – Factor deficiency, Easy bleeding, Absent (normal) PT, aPTT prolonged.<br>“R.I.C.E.” – Rest, Ice, Compression, Elevation for hemarthrosis.<br>“C.A.R.E.” – Concentrate replacement, Avoid IM injection, Rest joints, Educate family.</span></div>
+                    <button onclick="openQuiz('flashcards')" class="mt-6 w-full bg-slate-800 text-white font-black py-3 rounded-xl">Take Quiz → Unlock Final Exam</button>
+                </div>
+            </section>
+
+            <!-- FINAL EXAM SECTION -->
+            <section id="final_quiz_sec" class="content-section hidden">
+                <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8 text-center min-h-[60vh] flex flex-col justify-center items-center">
+                    <i class="fa-solid fa-graduation-cap text-8xl text-amber-500 mb-6"></i>
+                    <h2 class="text-4xl font-black text-slate-800 mb-4">Final 50‑Item Exam: Hemophilia</h2>
+                    <p class="text-lg text-slate-600 mb-8 max-w-2xl">Covers definition, epidemiology, genetics, clinical features, severity, diagnosis, management (factor replacement, DDAVP), nursing care, complications, prevention, and mnemonics. Score ≥75% to pass.</p>
+                    <button onclick="openQuiz('final_quiz')" class="w-full max-w-md bg-slate-800 text-white font-black py-4 rounded-xl shadow-md text-xl">Start Final Exam</button>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- QUIZ MODAL -->
+    <div id="quiz-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-slate-900/80 backdrop-blur-sm p-4">
+        <div class="bg-white w-full max-w-3xl rounded-2xl shadow-2xl p-6 md:p-8 relative max-h-[90vh] overflow-y-auto">
+            <button onclick="closeQuiz()" class="absolute top-4 right-4 text-slate-400 hover:text-red-500"><i class="fa-solid fa-xmark text-2xl"></i></button>
+            <h2 id="quiz-title" class="text-3xl font-black text-slate-800 mb-2"></h2>
+            <div id="quiz-questions-container" class="space-y-4 mt-4"></div>
+            <button id="quiz-submit-btn" onclick="submitQuiz()" class="mt-8 w-full bg-hemo text-white font-bold py-4 rounded-xl shadow-lg">Submit Answers</button>
+            <div id="quiz-result-container" class="hidden mt-6 p-4 rounded-xl bg-slate-100"></div>
+        </div>
+    </div>
+
+    <script>
+        // QUIZ DATA (10 questions each for sections)
+        const quizzes = {
+            simple: { title: "Hemophilia Like You're 5", next: "definition", questions: [
+                { q: "In the analogy, what is missing in the blood of a person with hemophilia?", options: ["Red blood cells","Clotting factors (glue)","White blood cells","Platelets"], ans: 1 },
+                { q: "Where does bleeding often happen inside the body in severe hemophilia?", options: ["Brain only","Joints (knees, ankles, elbows)","Muscles only","Skin only"], ans: 1 },
+                { q: "What special medicine do doctors give to replace the missing glue?", options: ["Factor concentrate","Antibiotics","Pain reliever","Cough syrup"], ans: 0 },
+                { q: "Which gender gets hemophilia more often?", options: ["Boys","Girls","Both equally","Only adults"], ans: 0 },
+                { q: "Why should children with hemophilia avoid contact sports?", options: ["Because they might bleed more easily","Because they are weak","Because they are tired","Because they don't like sports"], ans: 0 }
+            ] },
+            definition: { title: "Definition & Epidemiology", next: "genetics", questions: [
+                { q: "Hemophilia A is caused by deficiency of factor:", options: ["VIII","IX","XI","VII"], ans: 0 },
+                { q: "Global incidence of hemophilia A is approximately:", options: ["1 in 1,000 male births","1 in 5,000 male births","1 in 50,000 male births","1 in 100,000 male births"], ans: 1 },
+                { q: "In the Philippines, the Philippine Hemophilia Association estimates how many people with hemophilia?", options: ["500","2,000","10,000","50,000"], ans: 2 },
+                { q: "Hemophilia B is also known as:", options: ["Christmas disease","Classic hemophilia","Von Willebrand disease","Factor XI deficiency"], ans: 0 },
+                { q: "What percentage of hemophilia cases are hemophilia A?", options: ["50‑60%","70‑75%","80‑85%","95‑98%"], ans: 2 }
+            ] },
+            genetics: { title: "Genetics & Types", next: "clinical", questions: [
+                { q: "Hemophilia A and B follow which inheritance pattern?", options: ["Autosomal dominant","Autosomal recessive","X‑linked recessive","Mitochondrial"], ans: 2 },
+                { q: "A man with hemophilia will transmit the mutated gene to:", options: ["All of his daughters","All of his sons","All of his children","None of his children"], ans: 0 },
+                { q: "Carrier females (heterozygous) usually:", options: ["Have severe hemophilia","Are asymptomatic but may have mild bleeding","Have factor levels <1%","Are always affected"], ans: 1 },
+                { q: "The gene for factor VIII is located on:", options: ["Chromosome 1","Chromosome 4","X chromosome","Y chromosome"], ans: 2 },
+                { q: "Hemophilia C (factor XI deficiency) is:", options: ["X‑linked","Autosomal recessive","Autosomal dominant","Mitochondrial"], ans: 1 }
+            ] },
+            clinical: { title: "Clinical Features & Severity", next: "diagnosis", questions: [
+                { q: "The most common bleeding site in severe hemophilia is:", options: ["Intracranial","Hemarthrosis (joints)","Epistaxis","Gastrointestinal"], ans: 1 },
+                { q: "Factor VIII level <1% defines:", options: ["Mild hemophilia","Moderate hemophilia","Severe hemophilia","Carrier state"], ans: 2 },
+                { q: "A patient with factor VIII level 8% has:", options: ["Severe","Moderate","Mild","Normal"], ans: 2 },
+                { q: "Chronic hemarthrosis leads to:", options: ["Hemophilic arthropathy","Anemia","Thrombocytosis","Leukemia"], ans: 0 },
+                { q: "Which of the following is a characteristic of moderate hemophilia (factor level 1‑5%)?", options: ["Spontaneous bleeding weekly","Bleeding only after major trauma or surgery","No bleeding ever","Intracranial hemorrhage at birth"], ans: 1 }
+            ] },
+            diagnosis: { title: "Diagnosis & Tests", next: "management", questions: [
+                { q: "Which coagulation test is prolonged in hemophilia?", options: ["Prothrombin time (PT)","Activated partial thromboplastin time (aPTT)","Bleeding time","Thrombin time"], ans: 1 },
+                { q: "The gold standard to differentiate hemophilia A from B is:", options: ["PT","aPTT","Factor VIII and IX assays","Genetic testing"], ans: 2 },
+                { q: "Prenatal diagnosis of hemophilia can be performed by:", options: ["Maternal blood test","Amniocentesis or CVS","Newborn screening","Factor assay on cord blood"], ans: 1 },
+                { q: "A prolonged aPTT with normal PT suggests a deficiency in:", options: ["Factor VII","Factor VIII, IX, XI, or XII","Factor II, V, X","Fibrinogen"], ans: 1 },
+                { q: "Mixing study (aPTT correction with normal plasma) indicates:", options: ["Factor deficiency vs inhibitor","Liver disease","Vitamin K deficiency","Platelet disorder"], ans: 0 }
+            ] },
+            management: { title: "Management & Replacement Therapy", next: "nursing", questions: [
+                { q: "Drug of choice for mild hemophilia A is:", options: ["Factor VIII concentrate","Desmopressin (DDAVP)","Tranexamic acid","Emicizumab"], ans: 1 },
+                { q: "1 IU/kg of factor VIII concentrate increases factor VIII level by approximately:", options: ["1%","2%","5%","10%"], ans: 1 },
+                { q: "Which medication is used for hemophilia A with inhibitors?", options: ["Emicizumab (Hemlibra)","DDAVP","Factor IX concentrate","Tranexamic acid"], ans: 0 },
+                { q: "Prophylaxis (regular factor infusions) in severe hemophilia aims to:", options: ["Prevent joint damage","Cure the disease","Reduce factor cost","Avoid vaccination"], ans: 0 },
+                { q: "Which analgesic is safe for a child with hemophilia?", options: ["Aspirin","Ibuprofen","Acetaminophen (paracetamol)","Naproxen"], ans: 2 }
+            ] },
+            nursing: { title: "Nursing Care & Complications", next: "prevention", questions: [
+                { q: "For a patient with acute hemarthrosis, the nurse should:", options: ["Apply heat and massage","Administer factor then RICE (Rest, Ice, Compression, Elevation)","Immobilize for 1 month","Give aspirin"], ans: 1 },
+                { q: "Which immunization route should be avoided in hemophilia?", options: ["Oral","Subcutaneous","Intramuscular","Intranasal"], ans: 2 },
+                { q: "A major complication of repeated factor VIII infusions is:", options: ["Inhibitor formation (alloantibodies)","Thrombosis","Anaphylaxis","Diabetes"], ans: 0 },
+                { q: "A child with hemophilia presents with severe headache and vomiting. The nurse suspects:", options: ["Hemarthrosis","Intracranial hemorrhage","Mucosal bleeding","Hematuria"], ans: 1 },
+                { q: "The most common cause of death in severe hemophilia is:", options: ["Hemarthrosis","Intracranial hemorrhage","HIV infection","Hepatitis"], ans: 1 }
+            ] },
+            prevention: { title: "Prevention & Genetic Counseling", next: "flashcards", questions: [
+                { q: "Carrier testing for hemophilia A is done by:", options: ["Factor VIII assay and genetic testing","PT only","Complete blood count","Bleeding time"], ans: 0 },
+                { q: "Which of the following sports is generally safe for a child with severe hemophilia?", options: ["Football","Swimming","Boxing","Wrestling"], ans: 1 },
+                { q: "Prenatal diagnosis for hemophilia can be performed at what gestational age via CVS?", options: ["6‑8 weeks","11‑14 weeks","20‑24 weeks","30‑32 weeks"], ans: 1 },
+                { q: "A female with a hemophilia A mutation but factor VIII level 50% is called a:", options: ["Carrier","Severe hemophiliac","Moderate hemophiliac","Unaffected"], ans: 0 },
+                { q: "Preimplantation genetic diagnosis (PGD) is used to:", options: ["Select embryos without the mutation","Treat hemophilia","Increase factor levels","Prevent inhibitors"], ans: 0 }
+            ] },
+            flashcards: { title: "Flashcards & Mnemonics", next: "final_quiz_sec", questions: [
+                { q: "Mnemonic for factor deficiency in hemophilia A and B", options: ["A for Eight, B for Nine","A for Nine, B for Eight","C for Eight","D for Nine"], ans: 0 },
+                { q: "Most common bleeding site in severe hemophilia", options: ["Hemarthrosis (joints)","Intracranial","Epistaxis","GI"], ans: 0 },
+                { q: "Drug of choice for mild hemophilia A", options: ["DDAVP","Factor VIII","Tranexamic acid","Emicizumab"], ans: 0 },
+                { q: "Which coagulation test is prolonged in hemophilia?", options: ["aPTT","PT","INR","Bleeding time"], ans: 0 },
+                { q: "Safe analgesic for hemophilia", options: ["Acetaminophen","Ibuprofen","Aspirin","Naproxen"], ans: 0 }
+            ] }
+        };
+        // Build final 50-item exam
+        let finalQ = [];
+        for(let sec of ['simple','definition','genetics','clinical','diagnosis','management','nursing','prevention','flashcards']) {
+            if(quizzes[sec]) finalQ.push(...quizzes[sec].questions.slice(0,6));
+        }
+        while(finalQ.length < 50) finalQ.push({ q: "The most important nursing intervention for a child with hemophilia is:", options: ["Administer factor replacement promptly for bleeding","Keep the child in bed all day","Give aspirin for pain","Avoid all physical activity"], ans: 0 });
+        quizzes.final_quiz = { title: "Final 50-Item Exam: Hemophilia", next: null, questions: finalQ };
+
+        let unlockedSections = ['home'];
+        let hemoChart = null;
+
+        function initCharts() {
+            const ctx = document.getElementById('hemoChart')?.getContext('2d');
+            if(ctx && !hemoChart) {
+                hemoChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Hemophilia A', 'Hemophilia B', 'Hemophilia C'],
+                        datasets: [{ label: 'Relative frequency among hemophilias (%)', data: [85, 15, 1], backgroundColor: '#be123c', borderRadius: 6 }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { position: 'top' } } }
+                });
+            }
+        }
+
+        function toggleFlash(el) { const ans = el.querySelector('.flash-answer'); if(ans) ans.classList.toggle('hidden'); }
+        function unlockFirstSection() { if(!unlockedSections.includes('simple')) { unlockedSections.push('simple'); updateSidebarUI(); } showSection('simple'); }
+        function showSection(sectionId) {
+            if (!unlockedSections.includes(sectionId) && sectionId !== 'home') { alert("Complete the Active Recall Quiz at the bottom of the previous section to unlock."); return; }
+            document.querySelectorAll('.content-section').forEach(el => el.classList.add('hidden'));
+            document.getElementById(sectionId)?.classList.remove('hidden');
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('bg-hemo-light','text-hemo-dark','border-r-4','border-hemo-dark'));
+            const activeBtn = document.getElementById('btn-'+sectionId);
+            if(activeBtn) activeBtn.classList.add('bg-hemo-light','text-hemo-dark','border-r-4','border-hemo-dark');
+            if(window.innerWidth < 768) document.getElementById('sidebar').classList.add('hidden');
+            if(sectionId === 'definition' && !hemoChart) setTimeout(initCharts, 50);
+        }
+        function updateSidebarUI() {
+            const sections = ['home','simple','definition','genetics','clinical','diagnosis','management','nursing','prevention','flashcards','final_quiz_sec'];
+            sections.forEach(sec => {
+                const btn = document.getElementById('btn-'+sec);
+                if(!btn) return;
+                const lock = btn.querySelector('.fa-lock'), icon = btn.querySelector('.nav-icon');
+                if(unlockedSections.includes(sec) || sec==='home') { btn.classList.remove('locked-section'); if(lock) lock.classList.add('hidden'); if(icon) icon.classList.remove('hidden'); }
+                else { btn.classList.add('locked-section'); if(lock) lock.classList.remove('hidden'); if(icon) icon.classList.add('hidden'); }
+            });
+        }
+        let currentQuiz=null;
+        function openQuiz(sectionId) { currentQuiz = sectionId; const qd = quizzes[sectionId]; if(!qd) return; document.getElementById('quiz-title').innerHTML = qd.title; const container = document.getElementById('quiz-questions-container'); container.innerHTML = ''; qd.questions.forEach((q, idx) => { let html = `<div class="bg-slate-50 p-4 rounded-xl mb-4"><p class="font-bold mb-3">${idx+1}. ${q.q}</p><div class="space-y-2">`; q.options.forEach((opt,oi) => { html += `<label class="flex items-center space-x-3 p-2 rounded-lg hover:bg-white cursor-pointer"><input type="radio" name="q${idx}" value="${oi}" class="form-radio text-hemo"><span>${opt}</span></label>`; }); html += `</div><div class="feedback-${idx} text-sm mt-2 hidden"></div></div>`; container.innerHTML += html; }); document.getElementById('quiz-submit-btn').classList.remove('hidden'); document.getElementById('quiz-result-container').classList.add('hidden'); document.getElementById('quiz-modal').classList.remove('hidden'); }
+        function closeQuiz() { document.getElementById('quiz-modal').classList.add('hidden'); }
+        function submitQuiz() {
+            const qd = quizzes[currentQuiz];
+            if(!qd) return;
+            let score = 0;
+            for(let i=0; i<qd.questions.length; i++) {
+                const sel = document.querySelector(`input[name="q${i}"]:checked`);
+                if(sel && parseInt(sel.value)===qd.questions[i].ans) score++;
+                const fbDiv = document.querySelector(`.feedback-${i}`);
+                if(fbDiv){
+                    fbDiv.classList.remove('hidden');
+                    const correctTxt = qd.questions[i].options[qd.questions[i].ans];
+                    if(sel && parseInt(sel.value)===qd.questions[i].ans) { fbDiv.innerHTML='<span class="text-green-700">✓ Correct</span>'; fbDiv.parentElement?.classList.add('quiz-feedback-correct'); }
+                    else { const selectedTxt = sel? qd.questions[i].options[parseInt(sel.value)]:"No answer"; fbDiv.innerHTML=`<span class="text-red-700">✗ Incorrect. Correct: ${correctTxt}. You answered: ${selectedTxt}</span>`; fbDiv.parentElement?.classList.add('quiz-feedback-wrong'); }
+                }
+            }
+            let percent = (score/qd.questions.length)*100;
+            let resultDiv = document.getElementById('quiz-result-container');
+            document.getElementById('quiz-submit-btn').classList.add('hidden');
+            resultDiv.classList.remove('hidden');
+            if(percent>=75){
+                if(currentQuiz==='final_quiz'){ resultDiv.innerHTML=`<div class="text-green-600 text-4xl text-center">🎉 Excellent! Score ${score}/${qd.questions.length} (${percent}%)<br>You mastered Hemophilia!</div><button onclick="closeQuiz()" class="mt-4 bg-hemo text-white px-6 py-2 rounded-xl">Close</button>`; return; }
+                if(quizzes[currentQuiz].next && !unlockedSections.includes(quizzes[currentQuiz].next)) unlockedSections.push(quizzes[currentQuiz].next);
+                if(quizzes[currentQuiz].next === 'flashcards' && !unlockedSections.includes('final_quiz_sec')) unlockedSections.push('final_quiz_sec');
+                updateSidebarUI();
+                resultDiv.innerHTML=`<div class="text-green-600 text-3xl text-center">✅ Passed! (${score}/${qd.questions.length})</div><button onclick="closeQuiz(); showSection('${quizzes[currentQuiz].next}')" class="mt-4 bg-green-600 text-white px-6 py-2 rounded-xl">Unlock Next Section</button>`;
+            } else { resultDiv.innerHTML=`<div class="text-red-600 text-3xl text-center">❌ Failed: ${score}/${qd.questions.length} (${percent}%)<br>Need 75%</div><button onclick="openQuiz('${currentQuiz}')" class="mt-4 bg-slate-600 text-white px-6 py-2 rounded-xl">Try Again</button>`; }
+        }
+        function toggleRecallMode() { const active = !document.body.classList.contains('recall-mode'); const toggle=document.getElementById('recall-toggle'),knob=document.getElementById('recall-knob'); if(active){ document.body.classList.add('recall-mode'); toggle.classList.add('bg-hemo-dark'); knob.classList.add('translate-x-6'); } else { document.body.classList.remove('recall-mode'); toggle.classList.remove('bg-hemo-dark'); knob.classList.remove('translate-x-6'); } }
+        function toggleMobileMenu() { const s=document.getElementById('sidebar'); if(s.classList.contains('hidden')) s.classList.remove('hidden','flex','absolute','h-full','z-50'); else s.classList.add('hidden'); }
+        document.addEventListener('DOMContentLoaded', () => { updateSidebarUI(); document.querySelectorAll('.reveal-text').forEach(el => el.addEventListener('click', function(){ if(document.body.classList.contains('recall-mode')) this.classList.toggle('revealed'); })); });
+    </script>
+</body>
+</html>
